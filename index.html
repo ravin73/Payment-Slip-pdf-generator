@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Slip Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .form-section {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto 20px;
+            max-width: 150px; /* Adjust size as needed */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-section">
+        <img src="./public/images/logo.png" alt="Company Logo" class="logo">
+        <h1>Fill Salary Slip Information</h1>
+        <form id="salaryForm">
+            <label for="salaryMonth">Salary Slip Month</label>
+            <input type="month" id="salaryMonth" name="salaryMonth" required>
+
+            <label for="empName">Employee Name</label>
+            <input type="text" id="empName" name="empName" placeholder="Enter employee name" required>
+
+            <label for="empCode">Employee Code</label>
+            <input type="text" id="empCode" name="empCode" placeholder="Enter employee code" required>
+
+            <label for="fatherHusName">Father/Husband Name</label>
+            <input type="text" id="fatherHusName" name="fatherHusName" placeholder="Enter father or husband name" required>
+
+            <label for="doj">Date of Joining</label>
+            <input type="date" id="doj" name="doj" required>
+
+            <label for="designation">Designation</label>
+            <input type="text" id="designation" name="designation" placeholder="Enter designation" required>
+
+            <label for="department">Department</label>
+            <input type="text" id="department" name="department" placeholder="Enter department" required>
+
+            <label for="modeOfPayment">Mode of Payment</label>
+            <input type="text" id="modeOfPayment" name="modeOfPayment" placeholder="Enter payment mode" required>
+
+            <label for="branch">Branch/Site</label>
+            <input type="text" id="branch" name="branch" placeholder="Enter branch/site" required>
+
+            <label for="bankName">Bank Name</label>
+            <input type="text" id="bankName" name="bankName" placeholder="Enter bank name" required>
+
+            <label for="accountNumber">Account Number</label>
+            <input type="text" id="accountNumber" name="accountNumber" placeholder="Enter account number" required>
+
+            <label for="ifscCode">IFSC Code</label>
+            <input type="text" id="ifscCode" name="ifscCode" placeholder="Enter IFSC code" required>
+            
+            <label for="aadharNumber">Aadhar Number</label>
+            <input type="text" id="aadharNumber" name="aadharNumber" placeholder="Enter Aadhar number" required>
+
+            <label for="panNumber">PAN Number</label>
+            <input type="text" id="panNumber" name="panNumber" placeholder="Enter PAN number" required>
+
+            <label for="pfNumber">P.F Number</label>
+            <input type="text" id="pfNumber" name="pfNumber" placeholder="Enter PF Number" required>
+
+            <label for="basicSalary">Basic Salary</label>
+            <input type="number" id="basicSalary" name="basicSalary" placeholder="Enter basic salary" required>
+
+            <label for="hra">HRA</label>
+            <input type="number" id="hra" name="hra" placeholder="Enter HRA" required>
+
+            <label for="specialAllowance">Special Allowance</label>
+            <input type="number" id="specialAllowance" name="specialAllowance" placeholder="Enter special allowance" required>
+
+            <label for="ltc">LTC</label>
+            <input type="number" id="ltc" name="ltc" placeholder="Enter LTC" required>
+
+            <label for="tds">TDS</label>
+            <input type="number" id="tds" name="tds" placeholder="Enter TDS" required>
+
+            <button type="button" onclick="generatePDF()">Generate PDF</button>
+        </form>
+    </div>
+
+    <script>
+        // Function to submit the form data and request PDF generation
+        function generatePDF() {
+            const formData = new FormData(document.getElementById('salaryForm'));
+            const queryString = new URLSearchParams(formData).toString();
+
+            // Redirect to server-side endpoint for PDF generation
+            window.location.href = `/generate-pdf?${queryString}`;
+        }
+    </script>
+
+</body>
+</html>
