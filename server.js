@@ -24,7 +24,7 @@ app.get('/generate-pdf', async (req, res) => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
-
+   // const logopath=path.join(__dirname,'public/images/logo.png');
     // Generate the HTML content dynamically
 const htmlContent = `
 <!DOCTYPE html>
@@ -90,7 +90,7 @@ const htmlContent = `
 </head>
 <body>
     <div class="salary-slip">
-        <img src="./public/images/logo.png" alt="Company Logo" class="logo" />
+        <img src="http://localhost:5000/public/images/logo.png"" alt="Company Logo" class="logo" />
         <h1>RAJ CORPORATION LTD.</h1>
         <h2>SALARY SLIP FOR THE MONTH: ${salaryMonth}</h2>
         <table>
