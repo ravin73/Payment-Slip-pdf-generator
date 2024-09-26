@@ -11,7 +11,7 @@ app.use(express.static(__dirname));
 app.get('/generate-pdf', async (req, res) => {
     const {
         salaryMonth, empName,empCode,accountNumber,ifscCode, fatherHusName, designation,department, branch,doj,
-        bankName,modeOfPayment, aadharNumber, panNumber, pfNumber, basicSalary, hra, specialAllowance, ltc, tds,
+        bankName,modeOfPayment, aadharNumber, panNumber, pfNumber, basicSalary, hra, specialAllowance, ltc, tds,advance, 
         monthDays, lopDays, payDays, leaveOpb, leaveTaken, leaveCls
     } = req.query;
 
@@ -87,7 +87,7 @@ const htmlContent = `
         width: 50%;
       }
       .earnings-deductions td.right-align {
-        text-align: right;
+        text-align: left;
         padding-right: 10px;
       }
       .salary-summary p {
@@ -162,6 +162,7 @@ const htmlContent = `
         </tr>
         <tr>
           <td class="left-align">HRA: ${hra}</td>
+          <td class="right-align">ADVANCE: ${advance}</td>
           <td></td>
         </tr>
         <tr>
