@@ -28,175 +28,216 @@ app.get('/generate-pdf', async (req, res) => {
    // const logopath=path.join(__dirname,'public/images/logo.png');
     // Generate the HTML content dynamically
 const htmlContent = `
-   <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Salary Slip</title>
-        <style>
-          body {
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Slip</title>
+    <style>
+        body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-          }
-          .salary-slip {
+            background-color: #f4f4f4;
+        }
+
+        .salary-slip {
             width: 800px;
-            margin: 0 auto;
+            margin: 20px auto;
             padding: 20px;
-            border: 1px solid #000;
-          }
-          .logo {
+            border: 2px solid #ddd;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
             width: 100px;
             margin-bottom: 20px;
-          }
-          h1 {
+            display: block;
+            margin: 0 auto;
+        }
+
+        h1, h2 {
             text-align: center;
-            font-size: 20px;
+            margin: 5px;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
             text-transform: uppercase;
-            margin-bottom: 5px;
-          }
-          h2 {
-            text-align: center;
-            font-size: 16px;
-            margin-bottom: 20px;
-          }
-          table {
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: #555;
+        }
+
+        table {
             width: 100%;
             margin-bottom: 20px;
             border-collapse: collapse;
-          }
-          table th, table td {
-            border: 1px solid #000;
-            padding: 5px;
+        }
+
+        table th, table td {
+            padding: 10px;
             text-align: left;
             font-size: 12px;
-          }
-          table th {
+            border: 1px solid #ddd;
+        }
+
+        table th {
             background-color: #f2f2f2;
-          }
-          .centered-th {
+            font-weight: bold;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .centered-th {
             text-align: center;
-            font-weight: bold;
-          }
-          .earnings-deductions td.left-align {
-            text-align: left;
-            padding-left: 10px;
-          }
-          .earnings-deductions th, .earnings-deductions td {
-            width: 50%;
-          }
-          .earnings-deductions td.right-align {
-            text-align: left;
-            padding-right: 10px;
-          }
-          .salary-summary p {
-            font-size: 14px;
-            font-weight: bold;
-          }
-          .footer-note {
-            font-size: 10px;
+        }
+
+        .salary-summary {
             text-align: center;
             margin-top: 20px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="salary-slip">
-          <img src="http://localhost:5000/public/images/logo.png" alt="Company Logo" class="logo" />
-          <h1>RAJ CORPORATION LTD.</h1>
-          <h2>SALARY SLIP FOR THE MONTH: ${salaryMonth}</h2>
+        }
 
-          <table>
-            <!-- Employee Info -->
-            <tr>
-              <td><strong>EMP NAME:</strong> ${empName}</td>
-              <td><strong>FAR./HUS. NAME:</strong> ${fatherHusName}</td>
-            </tr>
-            <tr>
-              <td><strong>EMP CODE:</strong> ${empCode}</td>
-              <td><strong>DESIGNATION:</strong> ${designation}</td>
-            </tr>
-            <tr>
-              <td><strong>DEPARTMENT:</strong> ${department}</td>
-              <td><strong>BRANCH/SITE:</strong> ${branch}</td>
-            </tr>
-            <tr>
-              <td><strong>Date of Joining:</strong> ${doj}</td>
-              <td><strong>Pay Mode:</strong> ${modeOfPayment}</td>
-            </tr>
-            <tr>
-              <td><strong>BANK NAME:</strong> ${bankName}</td>
-              <td><strong>ACCOUNT NO:</strong> ${accountNumber}</td>
-            </tr>
-            <tr>
-              <td><strong>IFSC CODE:</strong> ${ifscCode}</td>
-              <td><strong>PF NO:</strong> ${pfNumber}</td>
-            </tr>
-            <tr>
-              <td><strong>ADHAAR No:</strong> ${aadharNumber}</td>
-              <td><strong>PAN NO:</strong> ${panNumber}</td>
-            </tr>
-            <tr>
-              <td><strong>UAN NO:</strong> ${uanNumber}</td> <!-- UAN Number Added -->
-            </tr>
-          </table>
+        .net-salary {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            display: inline-block;
+            font-weight: bold;
+            font-size: 16px;
+        }
 
-          <!-- New fields added -->
-          <table>
-            <tr>
-              <td><strong>MONTH DAYS:</strong> ${monthDays}</td>
-              <td><strong>LOP DAYS:</strong> ${lopDays}</td>
-              <td><strong>PAY DAYS:</strong> ${payDays}</td>
-            </tr>
-          </table>
+        .gross-salary {
+            background-color: #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            display: inline-block;
+            font-weight: bold;
+            font-size: 14px;
+        }
 
-          <!-- Earnings and Deductions Section -->
-          <table class="earnings-deductions">
-            <tr>
-              <th class="centered-th">EARNINGS</th>
-              <th class="centered-th">DEDUCTIONS</th>
-            </tr>
-            <tr>
-              <td class="left-align">BASIC: ${basicSalary}</td>
-              <td class="right-align">TDS: ${tds}</td>
-            </tr>
-            <tr>
-              <td class="left-align">HRA: ${hra}</td>
-              <td class="right-align">ADVANCE: ${advance}</td> <!-- Added Advance -->
-            </tr>
-            <tr>
-              <td class="left-align">SPECIAL ALLOWANCE: ${specialAllowance}</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td class="left-align">LTC: ${ltc}</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td class="left-align"><strong>TOTAL EARNINGS:</strong> ${totalEarnings.toFixed(2)}</td>
-              <td class="right-align"><strong>TOTAL DEDUCTIONS:</strong> ${totalDeductions.toFixed(2)}</td>
-            </tr>
-          </table>
+        .footer-note {
+            font-size: 10px;
+            text-align: center;
+            margin-top: 30px;
+            color: #888;
+        }
 
-          <!-- Leave details -->
-          <table>
+        .footer-bar {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px;
+            text-align: center;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="salary-slip">
+        <img src="http://localhost:5000/public/images/logo.png" alt="Company Logo" class="logo" />
+        <h1>RAJ CORPORATION LTD.</h1>
+        <h2>SALARY SLIP FOR THE MONTH: ${salaryMonth}</h2>
+
+        <table>
             <tr>
-              <td><strong>LEAVE OPB:</strong> ${leaveOpb}</td>
-              <td><strong>LEAVE TAKEN:</strong> ${leaveTaken}</td>
-              <td><strong>LEAVE CLS:</strong> ${leaveCls}</td>
+                <td><strong>EMP NAME:</strong> ${empName}</td>
+                <td><strong>FAR./HUS. NAME:</strong> ${fatherHusName}</td>
             </tr>
-          </table>
+            <tr>
+                <td><strong>EMP CODE:</strong> ${empCode}</td>
+                <td><strong>DESIGNATION:</strong> ${designation}</td>
+            </tr>
+            <tr>
+                <td><strong>DEPARTMENT:</strong> ${department}</td>
+                <td><strong>BRANCH/SITE:</strong> ${branch}</td>
+            </tr>
+            <tr>
+                <td><strong>Date of Joining:</strong> ${doj}</td>
+                <td><strong>Pay Mode:</strong> ${modeOfPayment}</td>
+            </tr>
+            <tr>
+                <td><strong>BANK NAME:</strong> ${bankName}</td>
+                <td><strong>ACCOUNT NO:</strong> ${accountNumber}</td>
+            </tr>
+            <tr>
+                <td><strong>IFSC CODE:</strong> ${ifscCode}</td>
+                <td><strong>PF NO:</strong> ${pfNumber}</td>
+            </tr>
+            <tr>
+                <td><strong>ADHAAR No:</strong> ${aadharNumber}</td>
+                <td><strong>PAN NO:</strong> ${panNumber}</td>
+            </tr>
+            <tr>
+                <td><strong>UAN No:</strong> ${uanNumber}</td>
+            </tr>
+        </table>
 
-          <div class="salary-summary">
-            <p><strong>GROSS SALARY:</strong> ${grossSalary.toFixed(2)}</p>
-            <p><strong>NET SALARY:</strong> ${netSalary.toFixed(2)}</p>
-          </div>
+        <table>
+            <tr>
+                <td><strong>MONTH DAYS:</strong> ${monthDays}</td>
+                <td><strong>LOP DAYS:</strong> ${lopDays}</td>
+                <td><strong>PAY DAYS:</strong> ${payDays}</td>
+            </tr>
+        </table>
 
-          <p class="footer-note">This is a computer-generated pay slip and does not require any signature.</p>
+        <table class="earnings-deductions">
+            <tr>
+                <th class="centered-th">EARNINGS</th>
+                <th class="centered-th">DEDUCTIONS</th>
+            </tr>
+            <tr>
+                <td>BASIC: ${basicSalary}</td>
+                <td>TDS: ${tds}</td>
+            </tr>
+            <tr>
+                <td>HRA: ${hra}</td>
+                <td>ADVANCE: ${advance}</td>
+            </tr>
+            <tr>
+                <td>SPECIAL ALLOWANCE: ${specialAllowance}</td>
+            </tr>
+            <tr>
+                <td>LTC: ${ltc}</td>
+            </tr>
+            <tr>
+                <td><strong>TOTAL EARNINGS:</strong> ${totalEarnings.toFixed(2)}</td>
+                <td><strong>TOTAL DEDUCTIONS:</strong> ${totalDeductions.toFixed(2)}</td>
+            </tr>
+        </table>
+
+        <table>
+            <tr>
+                <td><strong>LEAVE OPB:</strong> ${leaveOpb}</td>
+                <td><strong>LEAVE TAKEN:</strong> ${leaveTaken}</td>
+                <td><strong>LEAVE CLS:</strong> ${leaveCls}</td>
+            </tr>
+        </table>
+
+        <div class="salary-summary">
+            <div class="gross-salary">GROSS SALARY: ${grossSalary.toFixed(2)}</div>
+            <br />
+            <div class="net-salary">NET SALARY: ${netSalary.toFixed(2)}</div>
         </div>
-      </body>
-      </html>  `;
+
+        <p class="footer-note">This is a computer-generated pay slip and does not require any signature.</p>
+        <div class="footer-bar">
+            Salary Slip generated by Raj Corporation Ltd.
+        </div>
+    </div>
+</body>
+</html>
+  `;
 
    await page.setContent(htmlContent);
 
