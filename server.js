@@ -3,32 +3,65 @@ const puppeteer = require('puppeteer');
 const path = require('path');
 const app = express();
 
-
 // Serve static files
 app.use(express.static(__dirname));
+
+// Strings for ones, teens, and tens places
+var one = [ "", "one ", "two ", "three ", "four ", "five ", "six ", "seven ", "eight ", "nine ", "ten ", "eleven ", "twelve ", "thirteen ", "fourteen ", "fifteen ", "sixteen ", "seventeen ", "eighteen ", "nineteen "];
+var ten = [ "", "", "twenty ", "thirty ", "forty ", "fifty ", "sixty ", "seventy ", "eighty ", "ninety "];
+
+// Function to convert a 1- or 2-digit number into words
+function numToWords(n, s) {
+    var str = "";
+    if (n > 19) {
+        str += ten[parseInt(n / 10)] + one[n % 10];
+    } else {
+        str += one[n];
+    }
+    if (n != 0) {
+        str += s;
+    }
+    return str;
+}
+
+// Function to convert any number to words in Indian numbering system
+function convertToWords(n) {
+    var out = "";
+    out += numToWords(parseInt(n / 10000000), "crore ");
+    out += numToWords(parseInt((n / 100000) % 100), "lakh ");
+    out += numToWords(parseInt((n / 1000) % 100), "thousand ");
+    out += numToWords(parseInt((n / 100) % 10), "hundred ");
+    if (n > 100 && n % 100 > 0) {
+        out += "and ";
+    }
+    out += numToWords(n % 100, "");
+    return out.trim() + " rupees only";
+}
 
 // Route to generate the PDF
 app.get('/generate-pdf', async (req, res) => {
     const {
-        salaryMonth, empName,empCode,accountNumber,ifscCode, fatherHusName, designation,department, branch,doj,
-        bankName,modeOfPayment, aadharNumber, panNumber, pfNumber,uanNumber, basicSalary, hra, specialAllowance, ltc, tds,advance, 
+        salaryMonth, empName, empCode, accountNumber, ifscCode, fatherHusName, designation, department, branch, doj,
+        bankName, modeOfPayment, aadharNumber, panNumber, pfNumber, uanNumber, basicSalary, hra, specialAllowance, ltc, tds, advance,
         monthDays, lopDays, payDays, leaveOpb, leaveTaken, leaveCls
     } = req.query;
 
     // Calculate totals
     const totalEarnings = parseFloat(basicSalary) + parseFloat(hra) + parseFloat(specialAllowance) + parseFloat(ltc);
-    const totalDeductions = parseFloat(tds);
+    const totalDeductions = parseFloat(tds) + parseFloat(advance);
     const grossSalary = totalEarnings;
     const netSalary = totalEarnings - totalDeductions;
+
+    // Convert net salary to words
+    const netSalaryInWords = convertToWords(netSalary);
 
     // Launch Puppeteer and generate PDF
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
-   // const logopath=path.join(__dirname,'public/images/logo.png');
     // Generate the HTML content dynamically
-const htmlContent = `
-  <!DOCTYPE html>
+    const htmlContent = `
+   <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -126,6 +159,14 @@ const htmlContent = `
             font-size: 14px;
         }
 
+        .salary-in-words {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
         .footer-note {
             font-size: 10px;
             text-align: center;
@@ -145,10 +186,14 @@ const htmlContent = `
 </head>
 <body>
     <div class="salary-slip">
+        <!-- Company Logo -->
         <img src="http://localhost:5000/public/images/logo.png" alt="Company Logo" class="logo" />
+        <!-- Company Name -->
         <h1>RAJ CORPORATION LTD.</h1>
+        <!-- Salary Month -->
         <h2>SALARY SLIP FOR THE MONTH: ${salaryMonth}</h2>
 
+        <!-- Employee Details -->
         <table>
             <tr>
                 <td><strong>EMP NAME:</strong> ${empName}</td>
@@ -183,6 +228,7 @@ const htmlContent = `
             </tr>
         </table>
 
+        <!-- Attendance & Pay Days -->
         <table>
             <tr>
                 <td><strong>MONTH DAYS:</strong> ${monthDays}</td>
@@ -191,6 +237,7 @@ const htmlContent = `
             </tr>
         </table>
 
+        <!-- Earnings and Deductions -->
         <table class="earnings-deductions">
             <tr>
                 <th class="centered-th">EARNINGS</th>
@@ -216,6 +263,7 @@ const htmlContent = `
             </tr>
         </table>
 
+        <!-- Leave Summary -->
         <table>
             <tr>
                 <td><strong>LEAVE OPB:</strong> ${leaveOpb}</td>
@@ -224,12 +272,19 @@ const htmlContent = `
             </tr>
         </table>
 
+        <!-- Gross Salary and Net Salary -->
         <div class="salary-summary">
             <div class="gross-salary">GROSS SALARY: ${grossSalary.toFixed(2)}</div>
             <br />
             <div class="net-salary">NET SALARY: ${netSalary.toFixed(2)}</div>
         </div>
 
+        <!-- Net Salary in Words -->
+        <div class="salary-in-words">
+            <p><strong>Net Salary (in words):</strong> ${netSalaryInWords}</p>
+        </div>
+
+        <!-- Footer Note -->
         <p class="footer-note">This is a computer-generated pay slip and does not require any signature.</p>
         <div class="footer-bar">
             Salary Slip generated by Raj Corporation Ltd.
@@ -237,10 +292,10 @@ const htmlContent = `
     </div>
 </body>
 </html>
-  `;
 
-   await page.setContent(htmlContent);
+    `;
 
+    await page.setContent(htmlContent);
     
     // Generate PDF from the HTML content
     await page.pdf({ path: 'salary_slip.pdf', format: 'A4', printBackground: true });
