@@ -401,3 +401,4 @@ app.get('/generate-pdf', async (req, res) => {
 app.listen(5000, () => {
     console.log('Server running at http://localhost:5000');
 });
+// browser install chrome
