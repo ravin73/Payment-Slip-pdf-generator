@@ -66,7 +66,7 @@ app.get('/generate-pdf', async (req, res) => {
         browser = await puppeteer.launch({
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-            userDataDir: '/tmp/puppeteer_cache' // Set a cache directory
+            userDataDir:  '/opt/render/.cache/puppeteer' // Set a cache directory
         });
 
         const page = await browser.newPage();
