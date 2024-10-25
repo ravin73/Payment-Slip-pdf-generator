@@ -9,34 +9,34 @@ app.use(express.static(__dirname));
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)){
+if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir);
 }
 
-// Strings for number conversion (unchanged)
-var one = [ "", "one ", "two ", "three ", "four ", "five ", "six ", "seven ", "eight ", "nine ", "ten ", "eleven ", "twelve ", "thirteen ", "fourteen ", "fifteen ", "sixteen ", "seventeen ", "eighteen ", "nineteen "];
-var ten = [ "", "", "twenty ", "thirty ", "forty ", "fifty ", "sixty ", "seventy ", "eighty ", "ninety "];
+// Strings for number conversion
+var one = ["", "one ", "two ", "three ", "four ", "five ", "six ", "seven ", "eight ", "nine ", "ten ", "eleven ", "twelve ", "thirteen ", "fourteen ", "fifteen ", "sixteen ", "seventeen ", "eighteen ", "nineteen "];
+var ten = ["", "", "twenty ", "thirty ", "forty ", "fifty ", "sixty ", "seventy ", "eighty ", "ninety "];
 
-// Number conversion functions (unchanged)
+// Number conversion functions
 function numToWords(n, s) {
-    var str = "";
+    let str = "";
     if (n > 19) {
-        str += ten[parseInt(n / 10)] + one[n % 10];
+        str += ten[Math.floor(n / 10)] + one[n % 10];
     } else {
         str += one[n];
     }
-    if (n != 0) {
+    if (n !== 0) {
         str += s;
     }
     return str;
 }
 
 function convertToWords(n) {
-    var out = "";
-    out += numToWords(parseInt(n / 10000000), "crore ");
-    out += numToWords(parseInt((n / 100000) % 100), "lakh ");
-    out += numToWords(parseInt((n / 1000) % 100), "thousand ");
-    out += numToWords(parseInt((n / 100) % 10), "hundred ");
+    let out = "";
+    out += numToWords(Math.floor(n / 10000000), "crore ");
+    out += numToWords(Math.floor((n / 100000) % 100), "lakh ");
+    out += numToWords(Math.floor((n / 1000) % 100), "thousand ");
+    out += numToWords(Math.floor((n / 100) % 10), "hundred ");
     if (n > 100 && n % 100 > 0) {
         out += "and ";
     }
@@ -44,7 +44,7 @@ function convertToWords(n) {
     return out.trim() + " rupees only";
 }
 
-// Modified route to generate PDF with deployment fixes
+// Route to generate PDF
 app.get('/generate-pdf', async (req, res) => {
     try {
         const {
@@ -54,7 +54,6 @@ app.get('/generate-pdf', async (req, res) => {
             tds, advance, monthDays, lopDays, payDays, leaveOpb, leaveTaken, leaveCls
         } = req.query;
 
-        // Calculate totals
         const totalEarnings = parseFloat(basicSalary) + parseFloat(hra) + parseFloat(specialAllowance) + parseFloat(ltc);
         const totalDeductions = parseFloat(tds) + parseFloat(advance);
         const grossSalary = totalEarnings;
@@ -63,29 +62,14 @@ app.get('/generate-pdf', async (req, res) => {
 
         // Launch Puppeteer with specific args for deployment environment
         const browser = await puppeteer.launch({
-            headless: 'new',
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-accelerated-2d-canvas',
-                '--disable-gpu',
-                '--window-size=1920x1080'
-            ]
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
 
         const page = await browser.newPage();
-        
-        // Set viewport
-        await page.setViewport({
-            width: 1920,
-            height: 1080,
-            deviceScaleFactor: 1,
-        });
+        await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: 1 });
 
-        // HTML content (your existing HTML template)
-        const htmlContent = `
-        <!DOCTYPE html>
+        const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -405,48 +389,57 @@ app.get('/generate-pdf', async (req, res) => {
         </div>
     </div>
 </body>
-</html>
-        `; // Your existing HTML template
+</html> `; // Insert full HTML content here as in your code
+
+
 
         await page.setContent(htmlContent, {
             waitUntil: ['domcontentloaded', 'networkidle0']
         });
 
-        // Generate unique filename
         const timestamp = Date.now();
         const filename = `salary_slip_${timestamp}.pdf`;
         const filepath = path.join(uploadsDir, filename);
 
-        // Generate PDF with specific options
+        // Generate the PDF
         await page.pdf({
             path: filepath,
             format: 'A4',
             printBackground: true,
-            margin: {
-                top: '20px',
-                right: '20px',
-                bottom: '20px',
-                left: '20px'
-            }
+            margin: { top: '20px', right: '20px', bottom: '20px', left: '20px' }
         });
 
         await browser.close();
 
-        // Send file and clean up
+        // Send the PDF to the client
         res.download(filepath, filename, (err) => {
             if (err) {
                 console.error('Error sending file:', err);
-                // Clean up file even if send fails
                 fs.unlink(filepath, (unlinkErr) => {
                     if (unlinkErr) console.error('Error deleting file:', unlinkErr);
                 });
                 return res.status(500).send('Error generating PDF');
             }
-            // Clean up file after successful send
+
+            // Clean up the file after download
             fs.unlink(filepath, (unlinkErr) => {
                 if (unlinkErr) console.error('Error deleting file:', unlinkErr);
             });
         });
+
+        
+
+                // Add cleanup logic to delete the file after the response is sent
+                res.on('finish', () => {
+                    fs.unlink(filepath, (unlinkErr) => {
+                        if (unlinkErr) {
+                            console.warn('Error deleting file on response close:', unlinkErr.message);
+                        } else {
+                            console.log('File deleted successfully:', filename);
+                        }
+                    });
+                });
+        
 
     } catch (error) {
         console.error('PDF Generation Error:', error);
