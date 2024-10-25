@@ -65,7 +65,8 @@ app.get('/generate-pdf', async (req, res) => {
         // Puppeteer launch options for a cloud environment (with sandboxing disabled)
         browser = await puppeteer.launch({
             headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+            userDataDir: '/tmp/puppeteer_cache' // Set a cache directory
         });
 
         const page = await browser.newPage();
