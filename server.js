@@ -1,16 +1,23 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
 const path = require('path');
+const fs = require('fs');
 const app = express();
 
 // Serve static files
 app.use(express.static(__dirname));
 
-// Strings for ones, teens, and tens places
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)){
+    fs.mkdirSync(uploadsDir);
+}
+
+// Strings for number conversion (unchanged)
 var one = [ "", "one ", "two ", "three ", "four ", "five ", "six ", "seven ", "eight ", "nine ", "ten ", "eleven ", "twelve ", "thirteen ", "fourteen ", "fifteen ", "sixteen ", "seventeen ", "eighteen ", "nineteen "];
 var ten = [ "", "", "twenty ", "thirty ", "forty ", "fifty ", "sixty ", "seventy ", "eighty ", "ninety "];
 
-// Function to convert a 1- or 2-digit number into words
+// Number conversion functions (unchanged)
 function numToWords(n, s) {
     var str = "";
     if (n > 19) {
@@ -24,7 +31,6 @@ function numToWords(n, s) {
     return str;
 }
 
-// Function to convert any number to words in Indian numbering system
 function convertToWords(n) {
     var out = "";
     out += numToWords(parseInt(n / 10000000), "crore ");
@@ -38,30 +44,48 @@ function convertToWords(n) {
     return out.trim() + " rupees only";
 }
 
-// Route to generate the PDF
+// Modified route to generate PDF with deployment fixes
 app.get('/generate-pdf', async (req, res) => {
-    const {
-        salaryMonth, empName,payDate, empCode, accountNumber, ifscCode, fatherHusName, designation, department, branch, doj,
-        bankName, modeOfPayment, aadharNumber, panNumber, pfNumber, uanNumber, basicSalary, hra, specialAllowance, ltc, tds, advance,
-        monthDays, lopDays, payDays, leaveOpb, leaveTaken, leaveCls
-    } = req.query;
+    try {
+        const {
+            salaryMonth, empName, payDate, empCode, accountNumber, ifscCode, fatherHusName,
+            designation, department, branch, doj, bankName, modeOfPayment, aadharNumber,
+            panNumber, pfNumber, uanNumber, basicSalary, hra, specialAllowance, ltc,
+            tds, advance, monthDays, lopDays, payDays, leaveOpb, leaveTaken, leaveCls
+        } = req.query;
 
-    // Calculate totals
-    const totalEarnings = parseFloat(basicSalary) + parseFloat(hra) + parseFloat(specialAllowance) + parseFloat(ltc);
-    const totalDeductions = parseFloat(tds) + parseFloat(advance);
-    const grossSalary = totalEarnings;
-    const netSalary = totalEarnings - totalDeductions;
+        // Calculate totals
+        const totalEarnings = parseFloat(basicSalary) + parseFloat(hra) + parseFloat(specialAllowance) + parseFloat(ltc);
+        const totalDeductions = parseFloat(tds) + parseFloat(advance);
+        const grossSalary = totalEarnings;
+        const netSalary = totalEarnings - totalDeductions;
+        const netSalaryInWords = convertToWords(netSalary);
 
-    // Convert net salary to words
-    const netSalaryInWords = convertToWords(netSalary);
+        // Launch Puppeteer with specific args for deployment environment
+        const browser = await puppeteer.launch({
+            headless: 'new',
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--disable-gpu',
+                '--window-size=1920x1080'
+            ]
+        });
 
-    // Launch Puppeteer and generate PDF
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+        const page = await browser.newPage();
+        
+        // Set viewport
+        await page.setViewport({
+            width: 1920,
+            height: 1080,
+            deviceScaleFactor: 1,
+        });
 
-    // Generate the HTML content dynamically
-    const htmlContent = `
-<!DOCTYPE html>
+        // HTML content (your existing HTML template)
+        const htmlContent = `
+        <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -382,23 +406,62 @@ app.get('/generate-pdf', async (req, res) => {
     </div>
 </body>
 </html>
+        `; // Your existing HTML template
 
+        await page.setContent(htmlContent, {
+            waitUntil: ['domcontentloaded', 'networkidle0']
+        });
 
-    `;
+        // Generate unique filename
+        const timestamp = Date.now();
+        const filename = `salary_slip_${timestamp}.pdf`;
+        const filepath = path.join(uploadsDir, filename);
 
-    await page.setContent(htmlContent);
-    
-    // Generate PDF from the HTML content
-    await page.pdf({ path: 'salary_slip.pdf', format: 'A4', printBackground: true });
-    
-    await browser.close();
+        // Generate PDF with specific options
+        await page.pdf({
+            path: filepath,
+            format: 'A4',
+            printBackground: true,
+            margin: {
+                top: '20px',
+                right: '20px',
+                bottom: '20px',
+                left: '20px'
+            }
+        });
 
-    // Send PDF as download
-    res.download(path.join(__dirname, 'salary_slip.pdf'));
+        await browser.close();
+
+        // Send file and clean up
+        res.download(filepath, filename, (err) => {
+            if (err) {
+                console.error('Error sending file:', err);
+                // Clean up file even if send fails
+                fs.unlink(filepath, (unlinkErr) => {
+                    if (unlinkErr) console.error('Error deleting file:', unlinkErr);
+                });
+                return res.status(500).send('Error generating PDF');
+            }
+            // Clean up file after successful send
+            fs.unlink(filepath, (unlinkErr) => {
+                if (unlinkErr) console.error('Error deleting file:', unlinkErr);
+            });
+        });
+
+    } catch (error) {
+        console.error('PDF Generation Error:', error);
+        res.status(500).send('Error generating PDF: ' + error.message);
+    }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
 });
 
 // Start the server
-app.listen(5000, () => {
-    console.log('Server running at http://localhost:5000');
+const port = process.env.PORT || 5000;
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
-// browser install chrome
