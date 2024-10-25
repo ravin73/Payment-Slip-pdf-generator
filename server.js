@@ -214,14 +214,10 @@ app.get('/generate-pdf', async (req, res) => {
         .total-row td.amount {
             color: #388e3c;
         }
-
-        .salary-in-words {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-            text-transform: capitalize;
+        table {
+            width: 100%;
+            margin-bottom: 16px;
+            border-collapse:separate
         }
 
         .footer-note {
@@ -240,17 +236,30 @@ app.get('/generate-pdf', async (req, res) => {
             margin-top: 20px;
             font-size: 12px;
         }
+
+          .salary-in-words {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            text-transform: capitalize;
+        }
     </style>
 </head>
 <body>
     <div class="salary-slip">
+        <!-- Header Section -->
         <div class="header-section">
+            <!-- Company Info -->
             <div class="company-info">
                 <img src="http://localhost:5000/public/images/logo.png" alt="Company Logo" style="width: 100px; height: auto;">
                 <h1>RAJ CORPORATION LTD.</h1>
                 <p>CS-04, Block-F, Alpha II, Greater Noida-201310 (UP)</p>
                 <p>B/O: RCL Compound, Station Road, Mainpuri-205001 (UP)</p>
             </div>
+
+            <!-- Payslip Info -->
             <div class="payslip-info">
                 <h3>Payslip For the Month</h3>
                 <p><strong>${salaryMonth}</strong></p>
@@ -258,6 +267,7 @@ app.get('/generate-pdf', async (req, res) => {
             </div>
         </div>
 
+        <!-- Employee Summary -->
         <div class="employee-summary">
             <table>
                 <tr>
@@ -269,11 +279,11 @@ app.get('/generate-pdf', async (req, res) => {
                 <tr>
                     <th>Father/Husband Name:</th>
                     <td>${fatherHusName}</td>
-                    <th>Designation:</th>
+                    <th>Designation</th>
                     <td>${designation}</td>
                 </tr>
                 <tr>
-                    <th>Branch:</th>
+                    <th>Branch/Site:</th>
                     <td>${branch}</td>
                     <th>Department:</th>
                     <td>${department}</td>
@@ -281,101 +291,107 @@ app.get('/generate-pdf', async (req, res) => {
                 <tr>
                     <th>Date of Joining:</th>
                     <td>${doj}</td>
-                    <th>Bank Name:</th>
-                    <td>${bankName}</td>
+                    <th>Pay Mode:</th>
+                    <td>${modeOfPayment}</td>
                 </tr>
                 <tr>
-                    <th>Bank A/C No:</th>
+                    <th>Bank Name:</th>
+                    <td>${bankName}</td>
+                    <th>Account Number:</th>
                     <td>${accountNumber}</td>
+                </tr>
+                <tr>
                     <th>IFSC Code:</th>
                     <td>${ifscCode}</td>
+                    <th>PF Number</th>
+                    <td>${pfNumber}</td>
+
                 </tr>
                 <tr>
                     <th>Aadhar Number:</th>
                     <td>${aadharNumber}</td>
-                    <th>PAN Number:</th>
+                    <th>PAN Number</th>
                     <td>${panNumber}</td>
                 </tr>
                 <tr>
-                    <th>PF Number:</th>
-                    <td>${pfNumber}</td>
-                    <th>UAN Number:</th>
-                    <td>${uanNumber}</td>
-                </tr>
-                <tr>
-                    <th>Mode of Payment:</th>
-                    <td>${modeOfPayment}</td>
+                    <th>UAN Number</th>
+                    <td> ${uanNumber}</td>
                 </tr>
             </table>
         </div>
 
-        <div class="net-pay-box">
-            <div class="net-pay">Net Payable: ₹ ${netSalary.toFixed(2)}</div>
-            <div class="pay-summary">
-                <div>Total Earnings: ₹ ${totalEarnings.toFixed(2)}</div>
-                <div>Total Deductions: ₹ ${totalDeductions.toFixed(2)}</div>
-            </div>
-        </div>
+          <!-- Leave Summary -->
+          <table>
+            <tr>
+                <td><strong>LEAVE OPB:</strong> ${leaveOpb}</td>
+                <td><strong>LEAVE TAKEN:</strong> ${leaveTaken}</td>
+                <td><strong>LEAVE CLS:</strong> ${leaveCls}</td>
+            </tr>
+        </table>
 
+       
+
+        <!-- Earnings and Deductions Section -->
         <div class="earnings-deductions">
             <table>
-                <thead>
-                    <tr>
-                        <th>Earnings</th>
-                        <th class="amount">Amount</th>
-                        <th>Deductions</th>
-                        <th class="amount">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Basic Salary</td>
-                        <td class="amount">₹ ${basicSalary}</td>
-                        <td>TDS</td>
-                        <td class="amount">₹ ${tds}</td>
-                    </tr>
-                    <tr>
-                        <td>HRA</td>
-                        <td class="amount">₹ ${hra}</td>
-                        <td>Advance</td>
-                        <td class="amount">₹ ${advance}</td>
-                    </tr>
-                    <tr>
-                        <td>Special Allowance</td>
-                        <td class="amount">₹ ${specialAllowance}</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>LTC</td>
-                        <td class="amount">₹ ${ltc}</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="total-row">
-                        <td>Total Earnings</td>
-                        <td class="amount">₹ ${totalEarnings.toFixed(2)}</td>
-                        <td>Total Deductions</td>
-                        <td class="amount">₹ ${totalDeductions.toFixed(2)}</td>
-                    </tr>
-                </tbody>
+                <tr>
+                    <th>Earnings</th>
+                    <th class="amount">Amount</th>
+                    <th>Deductions</th>
+                    <th class="amount">Amount</th>
+                </tr>
+                <tr>
+                    <td>Basic</td>
+                    <td class="amount">Rs. ${basicSalary}</td>
+                    <td>TDS</td>
+                    <td class="amount">Rs. ${tds}</td>
+                </tr>
+                <tr>
+                    <td>House Rent Allowance</td>
+                    <td class="amount">Rs. ${hra}</td>
+                    <td>ADVANCE:</td>
+                    <td class="amount">Rs.  ${advance}</td>
+                </tr>
+                <tr>
+                    <td>Special Allowance</td>
+                    <td class="amount">Rs.  ${specialAllowance}</td>
+                </tr>
+                <tr>
+                    <td>LTC</td>
+                    <td class="amount">Rs.  ${ltc}</td>
+                </tr>
+                <tr></tr>
+                <tr class="total-row">
+                    <td>Gross Earnings</td>
+                    <td class="amount">Rs. ${totalEarnings.toFixed(2)}</td>
+                    <td>Total Deductions</td>
+                    <td class="amount">Rs. ${totalDeductions.toFixed(2)}</td>
+                </tr>
             </table>
         </div>
-
-        <div class="salary-in-words">
-            Salary in words: ${netSalaryInWords}
+         <!-- Net Pay Section -->
+         <div class="net-pay-box">
+            <div class="net-pay">Rs. ${netSalary.toFixed(2)}</div>
+            <div class="salary-in-words">
+                <p><strong>Net Salary (in words): Rs. </strong> ${netSalaryInWords}</p>
+            </div>
+            <div>Employee Net Pay</div>
+            <div class="pay-summary">
+                <div>Paid Days: <strong>${payDays}</strong></div>
+                <div>LOP Days: <strong>${lopDays}</strong></div>
+                <div>Month Days:<strong>${monthDays}</strong></div>
+            </div>
         </div>
+      
 
-        <div class="footer-note">
-            This is a system-generated payslip and does not require a signature.
-        </div>
-
+        <!-- Footer Note -->
+        <p class="footer-note">This is a system-generated document and does not require any signature.</p>
         <div class="footer-bar">
-            Thank you for being part of Raj Corporation Ltd.
+            Salary Slip generated by Raj Corporation Ltd.
         </div>
     </div>
 </body>
-</html>`;
+</html> `;
 
         await page.setContent(htmlContent, {
             waitUntil: ['domcontentloaded', 'networkidle0']
