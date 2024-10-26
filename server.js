@@ -5,6 +5,7 @@ const fs = require('fs');
 const app = express();
 
 // Serve static files
+// chrome updated
 app.use(express.static(__dirname));
 
 // Ensure uploads directory exists
