@@ -66,7 +66,15 @@ app.get('/generate-pdf', async (req, res) => {
         // Puppeteer launch options for a cloud environment (with sandboxing disabled)
         browser = await puppeteer.launch({
             headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process', // Helps with memory usage in some cases
+            ],
             defaultViewport: {
                 width: 1920,
                 height: 1080
